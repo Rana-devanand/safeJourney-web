@@ -9,7 +9,6 @@ import AdminSidebar from './components/AdminSidebar';
 import AdminHeader from './components/AdminHeader';
 import MetricGrid from './components/MetricGrid';
 import AnalyticsSection from './components/AnalyticsSection';
-import RecentTablesSection from './components/RecentTablesSection';
 
 // Custom Admin Stylesheet (replaces heavy Tailwind CDN script)
 import './theme/admin-theme.css';

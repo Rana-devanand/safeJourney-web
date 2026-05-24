@@ -1,9 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button, Typography } from 'antd';
+import { Button } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
-
-const { Text } = Typography;
 
 interface AdminSidebarProps {
   sidebarOpen: boolean;

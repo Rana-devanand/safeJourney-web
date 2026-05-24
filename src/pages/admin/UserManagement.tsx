@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Tag, Input, Row, Col, Card, Statistic, message } from 'antd';
+import { Spin, Tag, Input,Card, message } from 'antd';
 import {
   LoadingOutlined,
-  TeamOutlined,
-  UserOutlined,
-  DollarOutlined,
   SearchOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
@@ -36,9 +33,9 @@ const UserManagement: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [premiumCount, setPremiumCount] = useState(0);
-  const [activeCount, setActiveCount] = useState(0);
+  const [_, setTotalUsers] = useState(0);
+  const [__, setPremiumCount] = useState(0);
+  const [___, setActiveCount] = useState(0);
 
   useEffect(() => {
     loadData();

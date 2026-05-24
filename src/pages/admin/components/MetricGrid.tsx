@@ -1,5 +1,4 @@
 import React from 'react';
-import { RiseOutlined } from '@ant-design/icons';
 
 interface MetricGridProps {
   totalUsers: number;
