@@ -1,6 +1,4 @@
 import React from 'react';
-import { Timeline, Typography } from 'antd';
-import { SyncOutlined, CheckCircleOutlined, InfoCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,30 +17,35 @@ ChartJS.register(
   Legend
 );
 
-const { Paragraph } = Typography;
-
 interface AnalyticsSectionProps {
   recentLogs: any[];
+  monthlyPings: any[];
   loadDashboard: () => void;
 }
 
-interface ChartDataPoint {
-  month: string;
-  value: number;
-}
+const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ monthlyPings }) => {
+  // All 12 months for a complete fiscal/calendar year
+  const allMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  
+  // Format and merge dynamic database ping records with 12 months list
+  const chartData = allMonths.map(month => {
+    const dbRecord = (monthlyPings || []).find(
+      (p: any) => p.month?.toUpperCase() === month
+    );
+    return {
+      month,
+      value: dbRecord ? Number(dbRecord.value) : 0
+    };
+  });
 
-const chartData: ChartDataPoint[] = [
-  { month: 'JAN', value: 420 },
-  { month: 'FEB', value: 580 },
-  { month: 'MAR', value: 490 },
-  { month: 'APR', value: 780 },
-  { month: 'MAY', value: 960 },
-  { month: 'JUN', value: 640 },
-  { month: 'JUL', value: 810 },
-  { month: 'AUG', value: 890 },
-];
+  // Dynamically calculate current month abbreviation to highlight it in the chart
+  const currentMonthAbbr = new Date().toLocaleString('en-US', { month: 'short' }).toUpperCase();
 
-const   AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ recentLogs }) => {
+  // Dynamically determine the ceiling of the Y axis to keep the visuals pristine
+  const maxVal = Math.max(...chartData.map(d => d.value), 10);
+  const roundedMax = Math.ceil(maxVal / 100) * 100;
+  const stepSize = Math.max(10, Math.ceil(roundedMax / 4));
+
   // Chart.js data configuration
   const data = {
     labels: chartData.map(d => d.month),
@@ -50,10 +53,10 @@ const   AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ recentLogs }) => 
       {
         data: chartData.map(d => d.value),
         backgroundColor: chartData.map(d =>
-          d.month === 'MAY' ? '#3b82f6' : 'rgba(99, 102, 241, 0.15)'
+          d.month === currentMonthAbbr ? '#603F83' : 'rgba(96, 63, 131, 0.15)'
         ),
         hoverBackgroundColor: chartData.map(d =>
-          d.month === 'MAY' ? '#1d4ed8' : 'rgba(99, 102, 241, 0.35)'
+          d.month === currentMonthAbbr ? '#4e326b' : 'rgba(96, 63, 131, 0.35)'
         ),
         borderRadius: {
           topLeft: 6,
@@ -105,27 +108,26 @@ const   AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ recentLogs }) => 
         },
         ticks: {
           color: (context: any) =>
-            chartData[context.index]?.month === 'MAY' ? '#3b82f6' : '#94a3b8',
+            chartData[context.index]?.month === currentMonthAbbr ? '#603F83' : '#94a3b8',
           font: {
             family: 'Inter',
             size: 10,
             weight: (context: any) =>
-              chartData[context.index]?.month === 'MAY' ? 'bold' : 'normal',
+              chartData[context.index]?.month === currentMonthAbbr ? 'bold' : 'normal',
           },
         },
       },
       y: {
         min: 0,
-        max: 1000,
+        max: roundedMax,
         ticks: {
-          stepSize: 250,
+          stepSize: stepSize,
           color: '#94a3b8',
           font: {
             family: 'Inter',
             size: 10,
           },
         },
-
       },
     },
   };
@@ -133,8 +135,8 @@ const   AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ recentLogs }) => 
   return (
     <section className="mt-4">
       <div className="row g-4">
-        {/* Left Side: Growth Chart Area */}
-        <div className="col-12 col-xl-8">
+        {/* Growth Chart Area */}
+        <div className="col-12 col-xl-12">
           <div className=" rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between" style={{ border: '1px solid #e2e8f0' }}>
             <div className="d-flex justify-content-between align-items-center p-4">
               <div>
@@ -147,50 +149,6 @@ const   AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ recentLogs }) => 
             <div className=" rounded-bottom-3 p-4 p-lg-5" >
               <div style={{ height: 240, width: '100%', position: 'relative' }}>
                 <Bar data={data} options={options} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Timeline Log Area */}
-        <div className="col-12 col-xl-4">
-          <div className="rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between p-4" style={{ border: '1px solid #e2e8f0' }}>
-            <div>
-              <h4 className="fs-6 fw-bold text-light mb-4">System Logs & Activity</h4>
-
-              <div>
-                {recentLogs.length > 0 ? (
-                  <Timeline
-                    items={recentLogs.map((log) => {
-                      let dotIcon = <InfoCircleOutlined className="text-primary" />;
-                      if (log.action.toLowerCase().includes('login') || log.action.toLowerCase().includes('auth')) {
-                        dotIcon = <ExclamationCircleOutlined className="text-danger" />;
-                      } else if (log.action.toLowerCase().includes('premium') || log.action.toLowerCase().includes('subscribe')) {
-                        dotIcon = <CheckCircleOutlined className="text-success" />;
-                      } else if (log.action.toLowerCase().includes('journey')) {
-                        dotIcon = <SyncOutlined spin className="text-info" />;
-                      }
-
-                      const timeStr = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                      const dateStr = new Date(log.created_at).toLocaleDateString();
-
-                      return {
-                        dot: dotIcon,
-                        children: (
-                          <div style={{fontSize: '12px'}}>
-                            <p className="fw-bold text-light m-0">{log.action}</p>
-                            <p className="text-light m-0 my-1">{log.message}</p>
-                            <span className="font-monospace text-secondary" style={{fontSize: '10px'}}>{timeStr} · {dateStr}</span>
-                          </div>
-                        )
-                      };
-                    })}
-                  />
-                ) : (
-                  <Paragraph className="text-center py-4  text-light">
-                    No activity logs recorded yet.
-                  </Paragraph>
-                )}
               </div>
             </div>
           </div>

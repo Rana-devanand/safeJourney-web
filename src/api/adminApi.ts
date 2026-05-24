@@ -19,6 +19,7 @@ export interface DashboardStats {
   recentUsers: any[];
   recentJourneys: any[];
   recentLogs: any[];
+  monthlyPings: any[];
 }
 
 /**
@@ -44,6 +45,7 @@ export const adminApi = {
       recentUsers: (d.recentUsers || []).map((u: any) => ({ ...u, full_name: u.name, email: 'Hidden for privacy' })),
       recentJourneys: d.recentJourneys || [],
       recentLogs: d.recentLogs || [],
+      monthlyPings: d.monthlyPings || [],
     };
   },
 
@@ -84,5 +86,41 @@ export const adminApi = {
     const { data, error } = await supabase.rpc('delete_user', { p_user_id: userId });
     if (error) throw error;
     return data as { success: boolean; message: string };
+  },
+
+  /**
+   * Fetch paginated system logs for administrative dashboard.
+   * Uses the SECURITY DEFINER function `get_system_logs_admin`.
+   */
+  getSystemLogs: async (page: number = 1, pageSize: number = 10): Promise<{ logs: any[]; total: number }> => {
+    await authGuard();
+    const { data, error } = await supabase.rpc('get_system_logs_admin', { page, page_size: pageSize });
+    if (error) throw error;
+    const total = data?.[0]?.total_count ?? 0;
+    return { logs: data || [], total };
+  },
+
+  /**
+   * Fetch paginated user subscriptions for administrative dashboard.
+   * Uses the SECURITY DEFINER function `get_user_subscriptions_admin`.
+   */
+  getSubscriptions: async (page: number = 1, pageSize: number = 10): Promise<{ subscriptions: any[]; total: number }> => {
+    await authGuard();
+    const { data, error } = await supabase.rpc('get_user_subscriptions_admin', { page, page_size: pageSize });
+    if (error) throw error;
+    const total = data?.[0]?.total_count ?? 0;
+    return { subscriptions: data || [], total };
+  },
+
+  /**
+   * Fetch paginated journeys and completed statistics for administrative dashboard.
+   * Uses the SECURITY DEFINER function `get_journeys_admin`.
+   */
+  getJourneys: async (page: number = 1, pageSize: number = 10): Promise<{ journeys: any[]; total: number }> => {
+    await authGuard();
+    const { data, error } = await supabase.rpc('get_journeys_admin', { page, page_size: pageSize });
+    if (error) throw error;
+    const total = data?.[0]?.total_count ?? 0;
+    return { journeys: data || [], total };
   },
 };

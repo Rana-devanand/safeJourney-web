@@ -13,10 +13,9 @@ interface AdminSidebarProps {
 const navItems = [
   { path: '/admin/dashboard', icon: 'dashboard', label: 'Overview' },
   { path: '/admin/users', icon: 'group', label: 'Users' },
-  { path: '#', icon: 'map', label: 'Locations' },
-  { path: '#', icon: 'group_work', label: 'Circles' },
-  { path: '#', icon: 'terminal', label: 'System Logs' },
-  { path: '#', icon: 'payments', label: 'Subscriptions' },
+  { path: '/admin/history', icon: 'history', label: 'Journey History' },
+  { path: '/admin/logs', icon: 'terminal', label: 'System Logs' },
+  { path: '/admin/subscriptions', icon: 'payments', label: 'Subscriptions' },
 ];
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -80,10 +79,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>settings</span>
             <span>Settings</span>
           </a>
-          <a className="admin-nav-item py-2" href="#">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>help</span>
-            <span>Support</span>
-          </a>
+        
         </div>
         
         <Button

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Tag, Input,Card, message } from 'antd';
+import { Spin, Tag, Input, Card, message } from 'antd';
 import {
   LoadingOutlined,
   SearchOutlined,
@@ -13,6 +13,7 @@ import { adminApi } from '../../api/adminApi';
 import AdminSidebar from './components/AdminSidebar';
 import AdminHeader from './components/AdminHeader';
 import CommonTable from '../../components/CommonTable';
+import CustomModal from '../../components/CustomModal';
 import './theme/admin-theme.css';
 
 interface UserData {
@@ -33,77 +34,136 @@ const UserManagement: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [_, setTotalUsers] = useState(0);
-  const [__, setPremiumCount] = useState(0);
-  const [___, setActiveCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [_, setPremiumCount] = useState(0);
+  const [__, setActiveCount] = useState(0);
+
+  // Custom Modal States
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    title: string;
+    content: React.ReactNode;
+    confirmText: string;
+    type: 'info' | 'danger' | 'warning' | 'success';
+    onConfirm: () => Promise<void>;
+  } | null>(null);
 
   useEffect(() => {
-    loadData();
+    loadData(1, 10);
   }, []);
 
-   const loadData = async () => {
-     try {
-       const currentUser = await getCurrentUser();
-       if (!currentUser) {
-         window.location.href = '/admin';
-         return;
-       }
-       setUser(currentUser);
+  const loadData = async (page: number = currentPage, size: number = pageSize) => {
+    try {
+      setLoading(true);
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = '/admin';
+        return;
+      }
+      setUser(currentUser);
 
-       const [usersData, stats] = await Promise.all([
-         adminApi.getAllUsers(),
-         adminApi.getDashboardStats()
-       ]);
+      const [usersData, stats] = await Promise.all([
+        adminApi.getAllUsers(page, size),
+        adminApi.getDashboardStats()
+      ]);
 
-       setUsers(usersData.users || []);
-       setTotalUsers(usersData.total);
-       setPremiumCount(stats.premiumUsers);
-       setActiveCount((usersData.users || []).filter((u: UserData) => u.active).length);
-     } catch (err) {
-       console.error('UserManagement load error:', err);
-     } finally {
-       setLoading(false);
-     }
-   };
+      setUsers(usersData.users || []);
+      setTotalUsers(usersData.total || 0);
+      setPremiumCount(stats.premiumUsers);
+      setActiveCount((usersData.users || []).filter((u: UserData) => u.active).length);
+    } catch (err) {
+      console.error('UserManagement load error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    setPageSize(size);
+    loadData(page, size);
+  };
 
   const handleLogout = async () => {
     await signOut();
     window.location.href = '/admin';
   };
 
-   const handleToggleUserStatus = async (userId: string, currentActive: boolean) => {
-     try {
-       // block: true means ban/deactivate, block: false means unblock/activate
-       await adminApi.blockUser(userId, !currentActive);
-       message.success(`User ${currentActive ? 'deactivated' : 'activated'} successfully`);
-       loadData();
-     } catch (err: any) {
-       message.error(err.message || 'Operation failed');
-     }
-   };
+  const showToggleStatusConfirm = (record: UserData) => {
+    setModalConfig({
+      title: record.active ? 'Deactivate User' : 'Activate User',
+      content: (
+        <span>
+          Are you sure you want to {record.active ? 'deactivate' : 'activate'}{' '}
+          <strong>{record.full_name || record.email}</strong>?{' '}
+          {record.active 
+            ? 'They will be blocked from logging into the mobile application.' 
+            : 'They will regain full access to all features.'}
+        </span>
+      ),
+      confirmText: record.active ? 'Deactivate' : 'Activate',
+      type: record.active ? 'warning' : 'success',
+      onConfirm: async () => {
+        try {
+          setModalLoading(true);
+          await adminApi.blockUser(record.id, record.active);
+          message.success(`User ${record.active ? 'deactivated' : 'activated'} successfully`);
+          setModalOpen(false);
+          loadData(currentPage, pageSize);
+        } catch (err: any) {
+          message.error(err.message || 'Operation failed');
+        } finally {
+          setModalLoading(false);
+        }
+      }
+    });
+    setModalOpen(true);
+  };
 
-  const handleDeleteUser = async (userId: string) => {
-    try {
-      await adminApi.deleteUser(userId);
-      message.success('User deleted successfully');
-      loadData();
-    } catch (err: any) {
-      message.error(err.message || 'Delete failed');
-    }
+  const showDeleteConfirm = (record: UserData) => {
+    setModalConfig({
+      title: 'Permanently Delete User',
+      content: (
+        <span>
+          Are you sure you want to permanently delete{' '}
+          <strong>{record.full_name || record.email}</strong>?{' '}
+          <span style={{ color: '#ef4444', fontWeight: 600 }}>
+            This action is irreversible and will delete all their journeys, contacts, circles, and history.
+          </span>
+        </span>
+      ),
+      confirmText: 'Delete Permanently',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          setModalLoading(true);
+          await adminApi.deleteUser(record.id);
+          message.success('User deleted successfully');
+          setModalOpen(false);
+          
+          const isLastItemOnPage = users.length === 1 && currentPage > 1;
+          const nextPage = isLastItemOnPage ? currentPage - 1 : currentPage;
+          if (isLastItemOnPage) {
+            setCurrentPage(nextPage);
+          }
+          loadData(nextPage, pageSize);
+        } catch (err: any) {
+          message.error(err.message || 'Delete failed');
+        } finally {
+          setModalLoading(false);
+        }
+      }
+    });
+    setModalOpen(true);
   };
 
   const filteredUsers = users.filter((u) =>
     (u.full_name || '').toLowerCase().includes(searchText.toLowerCase()) ||
     (u.email || '').toLowerCase().includes(searchText.toLowerCase())
   );
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-50">
-        <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#3525cd' }} spin />} />
-      </div>
-    );
-  }
 
   const adminName = user?.email ? user.email.split('@')[0] : 'Admin';
 
@@ -118,7 +178,7 @@ const UserManagement: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
           <div style={{
             width: 36, height: 36, borderRadius: '50%',
-            background: record.profile_photo ? `url(${record.profile_photo}) center/cover` : 'linear-gradient(135deg, #6366f1, #3b82f6)',
+            background: record.profile_photo ? `url(${record.profile_photo}) center/cover` : 'linear-gradient(135deg, #603F83, #CAD5DB)',
             display: 'flex', justifyContent: 'center', alignItems: 'center',
             color: '#fff', fontWeight: 700, fontSize: 14,
             flexShrink: 0,
@@ -166,7 +226,7 @@ const UserManagement: React.FC = () => {
       key: 'premium',
       width: 100,
       render: (v: boolean) => (
-        <Tag color={v ? '#8b5cf6' : '#64748b'} style={{ borderRadius: 8, fontWeight: 600, margin: 0 }}>
+        <Tag color={v ? '#603F83' : '#64748b'} style={{ borderRadius: 8, fontWeight: 600, margin: 0 }}>
           {v ? 'Premium' : 'Free'}
         </Tag>
       ),
@@ -185,7 +245,7 @@ const UserManagement: React.FC = () => {
       render: (_: any, record: UserData) => (
         <div style={{ display: 'flex', gap: 8 }}>
           <span
-            onClick={() => handleToggleUserStatus(record.id, record.active)}
+            onClick={() => showToggleStatusConfirm(record)}
             style={{
               cursor: 'pointer',
               color: record.active ? '#f87171' : '#34d399',
@@ -200,7 +260,7 @@ const UserManagement: React.FC = () => {
             {record.active ? <><StopOutlined /></> : <><CheckCircleOutlined /></>}
           </span>
           <span
-            onClick={() => handleDeleteUser(record.id)}
+            onClick={() => showDeleteConfirm(record)}
             style={{
               cursor: 'pointer',
               color: '#f87171',
@@ -219,7 +279,6 @@ const UserManagement: React.FC = () => {
     },
   ];
 
-
   return (
     <div className="admin-shell">
       <AdminSidebar
@@ -232,48 +291,71 @@ const UserManagement: React.FC = () => {
       <main className="lg:ml-[200px] min-h-screen flex flex-col transition-all duration-300 pb-20 lg:pb-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
-
-          {/* Search & Refresh */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-            <Input
-              placeholder="Search users by name or email..."
-              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#4c4c4cff' }}
-            />
-            <span
-              onClick={loadData}
-              style={{
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                color: '#3b82f6', fontWeight: 600, fontSize: 13,
-                padding: '8px 16px', borderRadius: 10, background: '#eff6ff',
-                transition: 'all 0.2s',
-              }}
-            >
-              <ReloadOutlined /> Refresh
-            </span>
+        {loading ? (
+          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
           </div>
+        ) : (
+          <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
 
-          {/* Users Table */}
-          <Card
-            bordered={false}
-            style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-            title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>All Users ({filteredUsers.length})</span>}
-          >
-            <CommonTable
-              size="middle"
-              data={filteredUsers}
-              columns={columns}
-              rowKey="id"
-              pageSize={10}
-              totalText="users"
-              emptyText="No users found"
-            />
-          </Card>
-        </div>
+            {/* Search & Refresh */}
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+              <Input
+                placeholder="Search users by name or email..."
+                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
+              />
+              <button
+                onClick={() => loadData(currentPage, pageSize)}
+                style={{
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                  color: '#603F83', fontWeight: 600, fontSize: 13,
+                  padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <ReloadOutlined /> Refresh
+              </button>
+            </div>
+
+            {/* Users Table */}
+            <Card
+              bordered={false}
+              style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+              title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>All Users ({filteredUsers.length})</span>}
+            >
+              <CommonTable
+                size="middle"
+                data={filteredUsers}
+                columns={columns}
+                rowKey="id"
+                pageSize={pageSize}
+                currentPage={currentPage}
+                totalCount={totalUsers}
+                onPageChange={handlePageChange}
+                totalText="users"
+                emptyText="No users found"
+              />
+            </Card>
+          </div>
+        )}
       </main>
+
+      {/* Reusable Custom Modal */}
+      {modalConfig && (
+        <CustomModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={modalConfig.onConfirm}
+          title={modalConfig.title}
+          content={modalConfig.content}
+          confirmText={modalConfig.confirmText}
+          type={modalConfig.type}
+          loading={modalLoading}
+        />
+      )}
     </div>
   );
 };

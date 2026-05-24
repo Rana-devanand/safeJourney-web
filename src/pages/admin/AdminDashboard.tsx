@@ -21,6 +21,7 @@ interface DashboardStats {
   recentUsers: any[];
   recentJourneys: any[];
   recentLogs: any[];
+  monthlyPings: any[];
 }
 
 const AdminDashboard: React.FC = () => {
@@ -35,6 +36,7 @@ const AdminDashboard: React.FC = () => {
     recentUsers: [],
     recentJourneys: [],
     recentLogs: [],
+    monthlyPings: [],
   });
 
   useEffect(() => {
@@ -61,6 +63,7 @@ const AdminDashboard: React.FC = () => {
         recentUsers: stats.recentUsers || [],
         recentJourneys: stats.recentJourneys || [],
         recentLogs: stats.recentLogs || [],
+        monthlyPings: stats.monthlyPings || [],
       });
     } catch (err: any) {
       console.error('Dashboard load error:', err);
@@ -73,14 +76,6 @@ const AdminDashboard: React.FC = () => {
     await signOut();
     window.location.href = '/admin';
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-50">
-        <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#3525cd' }} spin />} />
-      </div>
-    );
-  }
 
   const adminName = user?.email ? user.email.split('@')[0] : 'Admin';
 
@@ -98,21 +93,31 @@ const AdminDashboard: React.FC = () => {
       <main className="lg:ml-[200px] d-flex flex-column transition-all duration-300 pb-5 pb-lg-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        {/* 3. Metrics HUD, Growth Charts, Tables Grid Container */}
-        <div className="container-fluid mt-5 p-4 p-lg-5 d-flex flex-column gap-4">
-          {/* Dynamic Metrics Cards */}
-          <MetricGrid
-            totalUsers={stats.totalUsers}
-            activeJourneys={stats.activeJourneys}
-            premiumUsers={stats.premiumUsers}
-            totalCircles={stats.totalCircles}
-          />
-          <AnalyticsSection recentLogs={stats.recentLogs} loadDashboard={loadDashboard} />
-          {/* <RecentTablesSection
-            recentUsers={stats.recentUsers}
-            recentJourneys={stats.recentJourneys}
-          /> */}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
+          </div>
+        ) : (
+          /* 3. Metrics HUD, Growth Charts, Tables Grid Container */
+          <div className="container-fluid mt-5 p-4 p-lg-5 d-flex flex-column gap-4">
+            {/* Dynamic Metrics Cards */}
+            <MetricGrid
+              totalUsers={stats.totalUsers}
+              activeJourneys={stats.activeJourneys}
+              premiumUsers={stats.premiumUsers}
+              totalCircles={stats.totalCircles}
+            />
+            <AnalyticsSection 
+              recentLogs={stats.recentLogs} 
+              monthlyPings={stats.monthlyPings} 
+              loadDashboard={loadDashboard} 
+            />
+            {/* <RecentTablesSection
+              recentUsers={stats.recentUsers}
+              recentJourneys={stats.recentJourneys}
+            /> */}
+          </div>
+        )}
       </main>
     </div>
   );

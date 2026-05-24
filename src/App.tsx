@@ -14,6 +14,9 @@ import Contact from './pages/Contact';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
+import SystemLogs from './pages/admin/SystemLogs';
+import Subscriptions from './pages/admin/Subscriptions';
+import JourneyHistory from './pages/admin/JourneyHistory';
 
 import './App.css';
 
@@ -24,6 +27,9 @@ function App() {
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<UserManagement />} />
+      <Route path="/admin/logs" element={<SystemLogs />} />
+      <Route path="/admin/subscriptions" element={<Subscriptions />} />
+      <Route path="/admin/history" element={<JourneyHistory />} />
 
       {/* Main web app with navbar/footer */}
       <Route path="/" element={

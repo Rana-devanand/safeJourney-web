@@ -9,6 +9,9 @@ interface CommonTableProps<T> extends Omit<TableProps<T>, 'dataSource'> {
   pageSize?: number;
   emptyText?: string;
   totalText?: string;
+  totalCount?: number;
+  currentPage?: number;
+  onPageChange?: (page: number, pageSize: number) => void;
 }
 
 function CommonTable<T extends object>({ 
@@ -19,12 +22,18 @@ function CommonTable<T extends object>({
   emptyText = 'No data found',
   totalText = 'items',
   size = 'middle',
+  totalCount,
+  currentPage,
+  onPageChange,
   ...restProps
 }: CommonTableProps<T>) {
 
   // Custom pagination configuration for a more modern, consistent UI
   const getPaginationConfig = () => ({
+    current: currentPage,
     pageSize,
+    total: totalCount !== undefined ? totalCount : data.length,
+    onChange: onPageChange,
     showSizeChanger: true,
     showTotal: (total: number, range: [number, number]) => (
       <span style={{ 
@@ -40,7 +49,7 @@ function CommonTable<T extends object>({
       if (type === 'prev' || type === 'next') {
         return (
           <a style={{ 
-            color: '#3b82f6',
+            color: '#603F83',
             fontWeight: 500,
             padding: '6px 12px',
             borderRadius: 8,
