@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Circles Management - AdminPanel</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#dae2fd",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "tertiary": "#005338",
+                    "primary-container": "#4f46e5",
+                    "secondary-container": "#dae2fd",
+                    "surface-container": "#e5eeff",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-container": "#5c647a",
+                    "on-surface-variant": "#464555",
+                    "on-secondary-fixed": "#131b2e",
+                    "primary-fixed": "#e2dfff",
+                    "tertiary-container": "#006e4b",
+                    "tertiary-fixed": "#6ffbbe",
+                    "surface-tint": "#4d44e3",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "error": "#ba1a1a",
+                    "on-surface": "#0b1c30",
+                    "surface-container-high": "#dce9ff",
+                    "surface-variant": "#d3e4fe",
+                    "on-error": "#ffffff",
+                    "outline": "#777587",
+                    "secondary": "#565e74",
+                    "on-primary-fixed": "#0f0069",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "background": "#f8f9ff",
+                    "on-background": "#0b1c30",
+                    "inverse-primary": "#c3c0ff",
+                    "on-tertiary-fixed": "#002113",
+                    "on-primary-container": "#dad7ff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "on-tertiary-container": "#67f4b7",
+                    "surface": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-container-low": "#eff4ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "on-primary": "#ffffff",
+                    "primary": "#3525cd",
+                    "outline-variant": "#c7c4d8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-padding-desktop": "32px",
+                    "stack-lg": "24px",
+                    "stack-md": "16px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "sidebar-width": "280px",
+                    "stack-sm": "8px",
+                    "container-padding-mobile": "16px"
+            },
+            "fontFamily": {
+                    "display-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "title-sm": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "body-md": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #f8f9ff;
+            -webkit-font-smoothing: antialiased;
+        }
+        .card-shadow {
+            box-shadow: 0px 1px 3px rgba(0,0,0,0.1);
+        }
+        .sidebar-active-accent {
+            position: relative;
+        }
+        .sidebar-active-accent::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: #3525cd;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-background">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-0 h-16 flex items-center justify-between px-gutter z-40 lg:left-[280px] bg-surface-bright shadow-sm">
+<div class="flex items-center gap-4">
+<span class="lg:hidden material-symbols-outlined cursor-pointer text-on-surface">menu</span>
+<div class="hidden lg:flex items-center bg-surface-container rounded-full px-4 py-1.5 w-96">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant" placeholder="Search circles..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">notifications</button>
+<button class="material-symbols-outlined p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">settings</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Administrator Profile" data-alt="A professional close-up portrait of a corporate administrator in a modern office setting. The lighting is soft and natural, emphasizing a clean and authoritative atmosphere. The color palette is dominated by soft grays and blues, consistent with a high-end enterprise software aesthetic. The person has a friendly but professional expression, wearing business casual attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCzk_wff4DGJm4MmXkWDQIEBb0fi5J4ldybfnBp6XTFg6olUlDIMX1BvV5SAHG0M2Ho1GLegyr4gRM23qFggbmi3uX6_vc3vNSdI4FfDxu_Akmcwe-AYlbecV3imZIWVy6BluIPSxmB6YRwRIUsFnGBEi5t0iVgNw5dA0KikEl5jQM7AWJiKyqz-Sz_zSJUB4oeZsBbASWqf2QQjgZLUBpDD7y4K4IAY6rNvH66c32_UQli_gKcLXmOP64Jb69EoeCwfm7TpV-wQU"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 bottom-0 w-[280px] hidden lg:flex flex-col z-50 bg-surface-container-low border-r border-outline-variant">
+<div class="p-6 flex flex-col gap-1">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Enterprise SaaS</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Admin Console</p>
+</div>
+<nav class="flex-1 px-4 mt-4 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-sm">Overview</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-sm">Users</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-body-sm">Locations</span>
+</a>
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container font-semibold px-4 py-3 rounded-lg border-l-4 border-primary sidebar-active-accent" href="#">
+<span class="material-symbols-outlined">group_work</span>
+<span class="font-body-sm">Circles</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-body-sm">System Logs</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-sm">Subscriptions</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant p-4 space-y-1">
+<div class="flex items-center gap-2 px-4 py-2 text-tertiary font-medium bg-tertiary-fixed/20 rounded-lg mb-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+<span class="text-[12px] uppercase tracking-wider">System Healthy</span>
+</div>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-sm">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="lg:ml-[280px] pt-16 min-h-screen">
+<div class="p-gutter max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-stack-lg">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface">Circles Management</h2>
+<p class="text-on-surface-variant font-body-md">Manage and monitor community groups across the organization.</p>
+</div>
+<button class="flex items-center justify-center gap-2 bg-primary-container text-on-primary-container px-6 py-3 rounded-lg font-semibold hover:opacity-90 active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined">add</span>
+                    Create New Circle
+                </button>
+</div>
+<!-- Filters & Search (Mobile) -->
+<div class="flex flex-col sm:flex-row gap-4 mb-8">
+<div class="sm:hidden flex-1 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-body-sm" placeholder="Search circles..." type="text"/>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-label-caps whitespace-nowrap">All Circles</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full text-label-caps whitespace-nowrap hover:bg-surface-container-high transition-colors">Development</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full text-label-caps whitespace-nowrap hover:bg-surface-container-high transition-colors">Marketing</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full text-label-caps whitespace-nowrap hover:bg-surface-container-high transition-colors">Product</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full text-label-caps whitespace-nowrap hover:bg-surface-container-high transition-colors">HR</button>
+</div>
+</div>
+<!-- Circles Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
+<!-- Circle Card 1 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md card-shadow hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[32px]">code</span>
+</div>
+<span class="px-2 py-1 bg-tertiary-fixed/30 text-tertiary text-[10px] font-bold uppercase rounded">Public</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface group-hover:text-primary transition-colors">Core Infrastructure</h3>
+<p class="text-on-surface-variant text-body-sm mt-2 line-clamp-2">Architecture and platform scaling discussions for global deployments.</p>
+<div class="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class="text-label-caps text-on-surface-variant">128 Members</span>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-outline font-bold uppercase">Last Activity</p>
+<p class="font-data-mono text-data-mono text-on-surface">2m ago</p>
+</div>
+</div>
+</div>
+<!-- Circle Card 2 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md card-shadow hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[32px]">palette</span>
+</div>
+<span class="px-2 py-1 bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase rounded">Private</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface group-hover:text-primary transition-colors">Design Systems</h3>
+<p class="text-on-surface-variant text-body-sm mt-2 line-clamp-2">Governing the UI kit, components, and brand documentation.</p>
+<div class="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class="text-label-caps text-on-surface-variant">42 Members</span>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-outline font-bold uppercase">Last Activity</p>
+<p class="font-data-mono text-data-mono text-on-surface">1h ago</p>
+</div>
+</div>
+</div>
+<!-- Circle Card 3 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md card-shadow hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[32px]">trending_up</span>
+</div>
+<span class="px-2 py-1 bg-tertiary-fixed/30 text-tertiary text-[10px] font-bold uppercase rounded">Public</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface group-hover:text-primary transition-colors">Growth &amp; Marketing</h3>
+<p class="text-on-surface-variant text-body-sm mt-2 line-clamp-2">Campaign tracking, lead generation strategies, and performance metrics.</p>
+<div class="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class="text-label-caps text-on-surface-variant">856 Members</span>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-outline font-bold uppercase">Last Activity</p>
+<p class="font-data-mono text-data-mono text-on-surface">15m ago</p>
+</div>
+</div>
+</div>
+<!-- Circle Card 4 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md card-shadow hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[32px]">security</span>
+</div>
+<span class="px-2 py-1 bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase rounded">Private</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface group-hover:text-primary transition-colors">Security Response</h3>
+<p class="text-on-surface-variant text-body-sm mt-2 line-clamp-2">Critical vulnerability management and incident response coordination.</p>
+<div class="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class="text-label-caps text-on-surface-variant">12 Members</span>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-outline font-bold uppercase">Last Activity</p>
+<p class="font-data-mono text-data-mono text-on-surface">4d ago</p>
+</div>
+</div>
+</div>
+<!-- Circle Card 5 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-md card-shadow hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[32px]">hub</span>
+</div>
+<span class="px-2 py-1 bg-tertiary-fixed/30 text-tertiary text-[10px] font-bold uppercase rounded">Public</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface group-hover:text-primary transition-colors">Open Source Hub</h3>
+<p class="text-on-surface-variant text-body-sm mt-2 line-clamp-2">Coordinating contributions to external libraries and community tooling.</p>
+<div class="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class="text-label-caps text-on-surface-variant">2.4k Members</span>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-outline font-bold uppercase">Last Activity</p>
+<p class="font-data-mono text-data-mono text-on-surface">Just now</p>
+</div>
+</div>
+</div>
+<!-- Empty State / Add New Placeholder -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-stack-md flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-outline group-hover:bg-primary-container group-hover:text-on-primary-container transition-all">
+<span class="material-symbols-outlined text-[28px]">add_circle</span>
+</div>
+<p class="font-title-sm mt-4 text-on-surface-variant">Create New Circle</p>
+<p class="text-body-sm text-outline px-8 mt-1">Establish a new community workspace for your team.</p>
+</div>
+</div>
+<!-- Activity Feed Side Panel (Asymmetric Component) -->
+<div class="mt-12 bg-surface-container-low rounded-2xl p-6 border border-outline-variant">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-headline-md text-headline-md text-on-surface">Global Circle Trends</h4>
+<button class="text-primary font-semibold text-body-sm">View Insights</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="p-4 bg-surface-container-lowest rounded-xl">
+<p class="text-label-caps text-outline uppercase mb-1">Total Circles</p>
+<p class="text-3xl font-bold text-on-surface">248</p>
+<p class="text-tertiary text-[12px] mt-1">+12 this month</p>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-xl">
+<p class="text-label-caps text-outline uppercase mb-1">Active Users</p>
+<p class="text-3xl font-bold text-on-surface">14.2k</p>
+<p class="text-tertiary text-[12px] mt-1">94% engagement</p>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-xl">
+<p class="text-label-caps text-outline uppercase mb-1">Priv. Groups</p>
+<p class="text-3xl font-bold text-on-surface">84</p>
+<p class="text-outline text-[12px] mt-1">Encrypted storage</p>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-xl">
+<p class="text-label-caps text-outline uppercase mb-1">Data Volume</p>
+<p class="text-3xl font-bold text-on-surface">2.4 TB</p>
+<p class="text-tertiary text-[12px] mt-1">Optimized cache</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full h-16 lg:hidden flex justify-around items-center px-4 z-50 bg-surface-container-high shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">person_search</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Users</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Circles</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Logs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Profile</span>
+</div>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>
