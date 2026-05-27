@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Card, Input } from 'antd';
-import { LoadingOutlined, SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons';
+import {  Card, Input } from 'antd';
+import {  SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons';
 import { getCurrentUser, signOut } from '../../lib/supabase-auth';
 import { adminApi } from '../../api/adminApi';
 import AdminSidebar from './components/AdminSidebar';
