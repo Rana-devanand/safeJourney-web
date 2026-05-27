@@ -13,6 +13,7 @@ interface AdminSidebarProps {
 const navItems = [
   { path: '/admin/dashboard', icon: 'dashboard', label: 'Overview' },
   { path: '/admin/users', icon: 'group', label: 'Users' },
+  { path: '/admin/devices', icon: 'devices', label: 'Device Management' },
   { path: '/admin/history', icon: 'history', label: 'Journey History' },
   { path: '/admin/logs', icon: 'terminal', label: 'System Logs' },
   { path: '/admin/subscriptions', icon: 'payments', label: 'Subscriptions' },

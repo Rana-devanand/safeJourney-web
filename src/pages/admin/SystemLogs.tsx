@@ -89,24 +89,25 @@ const SystemLogs: React.FC = () => {
       key: 'action',
       width: 160,
       render: (v: string) => {
+        const val = (v || '').toLowerCase();
         let badgeStyle = {
           background: 'rgba(96, 63, 131, 0.15)',
           color: '#c084fc',
           border: '1px solid rgba(168, 85, 247, 0.3)',
         };
-        if (v.toLowerCase().includes('delete') || v.toLowerCase().includes('remove') || v.toLowerCase().includes('ban') || v.toLowerCase().includes('block')) {
+        if (val.includes('delete') || val.includes('remove') || val.includes('ban') || val.includes('block')) {
           badgeStyle = {
             background: 'rgba(239, 68, 68, 0.12)',
             color: '#f87171',
             border: '1px solid rgba(239, 68, 68, 0.3)',
           };
-        } else if (v.toLowerCase().includes('create') || v.toLowerCase().includes('add') || v.toLowerCase().includes('success')) {
+        } else if (val.includes('create') || val.includes('add') || val.includes('success')) {
           badgeStyle = {
             background: 'rgba(16, 185, 129, 0.12)',
             color: '#34d399',
             border: '1px solid rgba(16, 185, 129, 0.3)',
           };
-        } else if (v.toLowerCase().includes('update') || v.toLowerCase().includes('edit')) {
+        } else if (val.includes('update') || val.includes('edit')) {
           badgeStyle = {
             background: 'rgba(245, 158, 11, 0.12)',
             color: '#fbbf24',
@@ -126,7 +127,7 @@ const SystemLogs: React.FC = () => {
               ...badgeStyle
             }}
           >
-            {v}
+            {v || 'SYSTEM'}
           </span>
         );
       },
@@ -208,56 +209,51 @@ const SystemLogs: React.FC = () => {
       <main className="lg:ml-[200px] min-h-screen flex flex-col transition-all duration-300 pb-20 lg:pb-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        {loading ? (
-          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
-          </div>
-        ) : (
-          <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
+        <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
 
-            {/* Search & Refresh */}
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
-              <Input
-                placeholder="Search logs by action, message, or user..."
-                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
-              />
-              <button
-                onClick={() => loadData(currentPage, pageSize)}
-                style={{
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                  color: '#603F83', fontWeight: 600, fontSize: 13,
-                  padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <ReloadOutlined /> Refresh
-              </button>
-            </div>
-
-            {/* System Logs Table */}
-            <Card
-              bordered={false}
-              style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-              title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>System Audit Logs ({totalLogs})</span>}
+          {/* Search & Refresh */}
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+            <Input
+              placeholder="Search logs by action, message, or user..."
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
+            />
+            <button
+              onClick={() => loadData(currentPage, pageSize)}
+              style={{
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                color: '#603F83', fontWeight: 600, fontSize: 13,
+                padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
+                transition: 'all 0.2s',
+              }}
             >
-              <CommonTable
-                size="middle"
-                data={filteredLogs}
-                columns={columns}
-                rowKey="id"
-                pageSize={pageSize}
-                currentPage={currentPage}
-                totalCount={totalLogs}
-                onPageChange={handlePageChange}
-                totalText="logs"
-                emptyText="No audit logs found"
-              />
-            </Card>
+              <ReloadOutlined /> Refresh
+            </button>
           </div>
-        )}
+
+          {/* System Logs Table */}
+          <Card
+            bordered={false}
+            style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+            title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>System Audit Logs ({totalLogs})</span>}
+          >
+            <CommonTable
+              size="middle"
+              loading={loading}
+              data={filteredLogs}
+              columns={columns}
+              rowKey="id"
+              pageSize={pageSize}
+              currentPage={currentPage}
+              totalCount={totalLogs}
+              onPageChange={handlePageChange}
+              totalText="logs"
+              emptyText="No audit logs found"
+            />
+          </Card>
+        </div>
       </main>
 
       {/* Audit Log Details Modal using custom BootStrap Modal */}

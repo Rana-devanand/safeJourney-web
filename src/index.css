@@ -1048,6 +1048,7 @@ section p { color: #cbd5e1; }
 }
 
 /* Base class hidden on desktop */
-.mobile-menu-toggle {
+.mobile-menu-toggle,
+.mobile-nav-dropdown {
   display: none;
 }

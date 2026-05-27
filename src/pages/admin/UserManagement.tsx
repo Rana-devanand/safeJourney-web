@@ -28,6 +28,53 @@ interface UserData {
   device_id?: string;
 }
 
+const UserAvatar: React.FC<{ name: string; profilePhoto?: string }> = ({ name, profilePhoto }) => {
+  const [imgError, setImgError] = React.useState(false);
+  const hasPhoto = profilePhoto && profilePhoto.trim() !== '' && !imgError;
+
+  const initials = React.useMemo(() => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + (parts[parts.length - 1]?.[0] || '')).toUpperCase().substring(0, 2);
+  }, [name]);
+
+  return (
+    <div style={{
+      width: 36,
+      height: 36,
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontWeight: 700,
+      fontSize: 14,
+      flexShrink: 0,
+      overflow: 'hidden',
+      position: 'relative',
+      background: hasPhoto ? 'transparent' : 'linear-gradient(135deg, #603F83, #CAD5DB)',
+      color: '#ffffff',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+    }}>
+      {hasPhoto ? (
+        <img
+          src={profilePhoto}
+          alt={name || 'User'}
+          onError={() => setImgError(true)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      ) : (
+        initials
+      )}
+    </div>
+  );
+};
+
 const UserManagement: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -176,15 +223,7 @@ const UserManagement: React.FC = () => {
       sorter: (a: UserData, b: UserData) => (a.full_name || '').localeCompare(b.full_name || ''),
       render: (v: string, record: UserData) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: record.profile_photo ? `url(${record.profile_photo}) center/cover` : 'linear-gradient(135deg, #603F83, #CAD5DB)',
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            color: '#fff', fontWeight: 700, fontSize: 14,
-            flexShrink: 0,
-          }}>
-            {!record.profile_photo && (v ? v.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'U')}
-          </div>
+          <UserAvatar name={v} profilePhoto={record.profile_photo} />
           <span style={{
             fontWeight: 600,
             color: 'var(--admin-text-primary, #f1f5f9)',
@@ -291,56 +330,51 @@ const UserManagement: React.FC = () => {
       <main className="lg:ml-[200px] min-h-screen flex flex-col transition-all duration-300 pb-20 lg:pb-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        {loading ? (
-          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
-          </div>
-        ) : (
-          <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
+        <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
 
-            {/* Search & Refresh */}
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
-              <Input
-                placeholder="Search users by name or email..."
-                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
-              />
-              <button
-                onClick={() => loadData(currentPage, pageSize)}
-                style={{
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                  color: '#603F83', fontWeight: 600, fontSize: 13,
-                  padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <ReloadOutlined /> Refresh
-              </button>
-            </div>
-
-            {/* Users Table */}
-            <Card
-              bordered={false}
-              style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-              title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>All Users ({filteredUsers.length})</span>}
+          {/* Search & Refresh */}
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+            <Input
+              placeholder="Search users by name or email..."
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
+            />
+            <button
+              onClick={() => loadData(currentPage, pageSize)}
+              style={{
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                color: '#603F83', fontWeight: 600, fontSize: 13,
+                padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
+                transition: 'all 0.2s',
+              }}
             >
-              <CommonTable
-                size="middle"
-                data={filteredUsers}
-                columns={columns}
-                rowKey="id"
-                pageSize={pageSize}
-                currentPage={currentPage}
-                totalCount={totalUsers}
-                onPageChange={handlePageChange}
-                totalText="users"
-                emptyText="No users found"
-              />
-            </Card>
+              <ReloadOutlined /> Refresh
+            </button>
           </div>
-        )}
+
+          {/* Users Table */}
+          <Card
+            bordered={false}
+            style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+            title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>All Users ({filteredUsers.length})</span>}
+          >
+            <CommonTable
+              size="middle"
+              loading={loading}
+              data={filteredUsers}
+              columns={columns}
+              rowKey="id"
+              pageSize={pageSize}
+              currentPage={currentPage}
+              totalCount={totalUsers}
+              onPageChange={handlePageChange}
+              totalText="users"
+              emptyText="No users found"
+            />
+          </Card>
+        </div>
       </main>
 
       {/* Reusable Custom Modal */}

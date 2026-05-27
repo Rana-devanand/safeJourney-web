@@ -49,7 +49,7 @@ const Navbar: React.FC = () => {
           type="primary"
           shape="round"
           icon={<ArrowRightOutlined />}
-          onClick={() => alert('App Store & Google Play links coming soon!')}
+          onClick={() => window.open('https://play.google.com/store/apps/details?id=com.foocusedai.safejourney', '_blank')}
         >
           Download App
         </Button>
@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
         <button
           className="btn mobile-download-btn fw-bold mt-2"
           onClick={() => {
-            alert('App Store & Google Play links coming soon!');
+            window.open('https://play.google.com/store/apps/details?id=com.foocusedai.safejourney', '_blank');
             setMenuOpen(false);
           }}
         >

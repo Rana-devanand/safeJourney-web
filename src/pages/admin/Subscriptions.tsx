@@ -149,8 +149,9 @@ const Subscriptions: React.FC = () => {
       key: 'status',
       width: 220,
       render: (v: string) => {
-        const isActive = v.toLowerCase() === 'active';
-        const displayStatus = v.replace(/_/g, ' ');
+        const val = v || '';
+        const isActive = val.toLowerCase() === 'active';
+        const displayStatus = val.replace(/_/g, ' ');
         return (
           <Tag 
             color={isActive ? '#10b981' : '#ef4444'} 
@@ -236,56 +237,51 @@ const Subscriptions: React.FC = () => {
       <main className="lg:ml-[200px] min-h-screen flex flex-col transition-all duration-300 pb-20 lg:pb-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        {loading ? (
-          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
-          </div>
-        ) : (
-          <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
+        <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
 
-            {/* Search & Refresh */}
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
-              <Input
-                placeholder="Search subscriptions by transaction, user, plan..."
-                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
-              />
-              <button
-                onClick={() => loadData(currentPage, pageSize)}
-                style={{
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                  color: '#603F83', fontWeight: 600, fontSize: 13,
-                  padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <ReloadOutlined /> Refresh
-              </button>
-            </div>
-
-            {/* Subscriptions Table */}
-            <Card
-              bordered={false}
-              style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-              title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>Subscription Transactions ({totalSubscriptions})</span>}
+          {/* Search & Refresh */}
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+            <Input
+              placeholder="Search subscriptions by transaction, user, plan..."
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
+            />
+            <button
+              onClick={() => loadData(currentPage, pageSize)}
+              style={{
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                color: '#603F83', fontWeight: 600, fontSize: 13,
+                padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
+                transition: 'all 0.2s',
+              }}
             >
-              <CommonTable
-                size="middle"
-                data={filteredSubscriptions}
-                columns={columns}
-                rowKey="subscription_id"
-                pageSize={pageSize}
-                currentPage={currentPage}
-                totalCount={totalSubscriptions}
-                onPageChange={handlePageChange}
-                totalText="subscriptions"
-                emptyText="No subscriptions found"
-              />
-            </Card>
+              <ReloadOutlined /> Refresh
+            </button>
           </div>
-        )}
+
+          {/* Subscriptions Table */}
+          <Card
+            bordered={false}
+            style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+            title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>Subscription Transactions ({totalSubscriptions})</span>}
+          >
+            <CommonTable
+              size="middle"
+              loading={loading}
+              data={filteredSubscriptions}
+              columns={columns}
+              rowKey="subscription_id"
+              pageSize={pageSize}
+              currentPage={currentPage}
+              totalCount={totalSubscriptions}
+              onPageChange={handlePageChange}
+              totalText="subscriptions"
+              emptyText="No subscriptions found"
+            />
+          </Card>
+        </div>
       </main>
 
       {/* Subscription Details Modal using Custom Bootstrap Modal */}

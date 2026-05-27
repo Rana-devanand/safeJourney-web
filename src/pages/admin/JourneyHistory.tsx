@@ -209,7 +209,7 @@ const JourneyHistory: React.FC = () => {
       key: 'status',
       width: 160,
       render: (v: string) => {
-        const status = v.toLowerCase();
+        const status = (v || '').toLowerCase();
         let bg = '#334155'; // planned
         let icon = <ClockCircleOutlined />;
         
@@ -297,57 +297,51 @@ const JourneyHistory: React.FC = () => {
       <main className="lg:ml-[200px] min-h-screen flex flex-col transition-all duration-300 pb-20 lg:pb-0">
         <AdminHeader setSidebarOpen={setSidebarOpen} adminName={adminName} />
 
-        {loading ? (
-          <div className="flex justify-center items-center flex-1 min-h-[calc(100vh-72px)]">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 36, color: '#603F83' }} spin />} />
-          </div>
-        ) : (
-          <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
+        <div className="mt-16 p-6 lg:p-8 flex flex-col gap-6">
 
-            {/* Search & Refresh */}
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
-              <Input
-                placeholder="Search journeys by name, user, route, or status..."
-                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
-              />
-              <button
-                onClick={() => loadData(currentPage, pageSize)}
-                style={{
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                  color: '#603F83', fontWeight: 600, fontSize: 13,
-                  padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <ReloadOutlined /> Refresh
-              </button>
-            </div>
-
-            {/* Journeys Table */}
-            <Card
-              bordered={false}
-              style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-              title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>User Journeys History ({totalJourneys})</span>}
+          {/* Search & Refresh */}
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+            <Input
+              placeholder="Search journeys by name, user, route, or status..."
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ maxWidth: 380, borderRadius: 12, height: 42 , background : '#0b1734ff' , border : "none" }}
+            />
+            <button
+              onClick={() => loadData(currentPage, pageSize)}
+              style={{
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                color: '#603F83', fontWeight: 600, fontSize: 13,
+                padding: '8px 16px', borderRadius: 10, background: 'rgba(96, 63, 131, 0.15)',
+                transition: 'all 0.2s',
+              }}
             >
-              <CommonTable
-                size="middle"
-                data={filteredJourneys}
-                columns={columns}
-                rowKey="journey_id"
-                pageSize={pageSize}
-                currentPage={currentPage}
-                totalCount={totalJourneys}
-                onPageChange={handlePageChange}
-                totalText="journeys"
-                emptyText="No journeys found"
-                scroll={{ x: 1330 }}
-              />
-            </Card>
+              <ReloadOutlined /> Refresh
+            </button>
           </div>
-        )}
+
+          {/* Journeys Table */}
+          <Card
+            bordered={false}
+            style={{ borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+            title={<span style={{ fontSize: 16, fontWeight: 700, color: '#e4e4e4ff' }}>User Journeys History ({totalJourneys})</span>}
+          >
+            <CommonTable
+              size="middle"
+              loading={loading}
+              data={filteredJourneys}
+              columns={columns}
+              rowKey="journey_id"
+              pageSize={pageSize}
+              currentPage={currentPage}
+              totalCount={totalJourneys}
+              onPageChange={handlePageChange}
+              totalText="journeys"
+              emptyText="No journeys found"
+            />
+          </Card>
+        </div>
       </main>
 
       {/* Journey Details Modal using Custom Bootstrap Modal */}

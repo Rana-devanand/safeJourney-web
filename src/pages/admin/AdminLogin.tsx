@@ -55,7 +55,7 @@ const AdminLogin: React.FC = () => {
             text: 'signin_with',
             size: 'large',
             logo_alignment: 'left',
-            width: buttonRef.current.offsetWidth || 380,
+            width: 320, // Set to exactly 320px for perfect alignment without clipping
           });
         }
       }
@@ -186,13 +186,13 @@ const AdminLogin: React.FC = () => {
           Sign in with your Google account to access the Safe Journey administration panel.
         </Paragraph>
 
-        {/* Google Sign-In Button (hidden GSI rendered button) */}
+        {/* Google Sign-In Button (rendered natively via GSI script) */}
         <div ref={buttonRef} style={{ 
           display: gsiLoaded ? 'flex' : 'none',
           justifyContent: 'center', 
+          alignItems: 'center',
           marginBottom: '16px',
-          borderRadius: '26px',
-          overflow: 'hidden',
+          width: '100%',
         }} />
 
         {/* Fallback button if GSI hasn't rendered yet */}

@@ -123,4 +123,35 @@ export const adminApi = {
     const total = data?.[0]?.total_count ?? 0;
     return { journeys: data || [], total };
   },
+
+  /**
+   * Fetch paginated users list with their device IDs.
+   * Uses the SECURITY DEFINER function `get_users_with_devices_admin`.
+   */
+  getUsersWithDevices: async (page: number = 1, pageSize: number = 10, searchQuery: string = ''): Promise<{ users: any[]; total: number }> => {
+    await authGuard();
+    const { data, error } = await supabase.rpc('get_users_with_devices_admin', { 
+      page, 
+      page_size: pageSize,
+      search_query: searchQuery
+    });
+    if (error) throw error;
+    const total = data?.[0]?.total_count ?? 0;
+    return { users: data || [], total };
+  },
+
+  /**
+   * Unlink device ID of a user.
+   * Uses the SECURITY DEFINER function `unlink_device_id_admin`.
+   */
+  unlinkDevice: async (userId: string): Promise<{ success: boolean; message: string }> => {
+    await authGuard();
+    const { data, error } = await supabase.rpc('unlink_device_id_admin', { p_user_id: userId });
+    if (error) throw error;
+    const res = data as any[];
+    return {
+      success: res?.[0]?.success ?? false,
+      message: res?.[0]?.message ?? 'Failed to unlink device.'
+    };
+  },
 };

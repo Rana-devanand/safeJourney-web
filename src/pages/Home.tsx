@@ -47,7 +47,7 @@ const Home: React.FC = () => {
                     type="primary" 
                     size="large"
                     style={{ height: '48px', padding: '0 28px', fontSize: '15px', borderRadius: '24px' }}
-                    onClick={() => alert('App Store & Google Play links coming soon!')}
+                    onClick={() => window.open('https://play.google.com/store/apps/details?id=com.foocusedai.safejourney', '_blank')}
                   >
                     Download App
                   </Button>
@@ -279,7 +279,7 @@ const Home: React.FC = () => {
             className="btn-cta-premium"
             type="primary" 
             size="large"
-            onClick={() => alert('Download requested!')}
+            onClick={() => window.open('https://play.google.com/store/apps/details?id=com.foocusedai.safejourney', '_blank')}
           >
             Download Safe Journey App
           </Button>
